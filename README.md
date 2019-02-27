@@ -1,4 +1,4 @@
-##Assignment 2##
+#Assignment 2#
 Here is my blog post on assignment 2. Assignment 2 was about the Map-Reduce framework and how to write code that can run on an hadoop cluster. In the lectures I got to learn how map-reduce code works and how to write working code. Here is what I did:
 
 1. First, I started a docker container and ran the hadoop file system in it. 
