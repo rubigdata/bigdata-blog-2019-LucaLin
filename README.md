@@ -12,6 +12,8 @@ Because hadoop is a different file system, in order to get the outputs of the jo
 
 Running the command 'hdfs dfs -cat output/part-r-00000' would display the outputs of the job on in the command prompt but I wanted to open the files from home. 
 
+#Word count
+
 Below is the pseudocode for the mapper in WordCount.java:
 
 	public void map(key,value){  
@@ -40,6 +42,8 @@ During the mapper phase, words are emitted after every word with a value of 1. D
 
 The Map-Reduce code does not take into account special characters. If we want to get the words so that special characters are filtered out, we need to do this in the map phase by using a regular expression to filter special characters out and emit the filtered word. 
 
+#Total Word Count
+
 To get the total word count (of all words), the mapper can be changed to emit the same word every time. For example:
 
 	public void map(key,value){
@@ -49,11 +53,15 @@ To get the total word count (of all words), the mapper can be changed to emit th
 
 There are 959301 words in total in the file.
 
+#Number of Lines
+
 Counting the number of lines is easy. Simply emitting the same word (perhaps an empty word) and the value of 1 does it. There are 147838 lines in the 'Complete Shakespeare' file. It seems like every mapper gets 1 line as input. Below is pseudocode for counting the number of lines:
 
 	public void map(key,value){  
 	    emit("",1)  
 	}
+
+#Number of Characters
 
 To count the number of characters, change the mapper loop over every word and emit each character. Example:
 
@@ -74,6 +82,8 @@ Example output:
 	h	238451
 	i	216326
 
+#'Romeo' and 'Juliet' Occurrences
+
 Now we answer the question: Are there more Romeo or Juliet occurrances in the 'Complete Shakespeare' file? To do that, the mapper has to be changed so that it emits only when the word contains either 'Romeo' or 'Juliet'. An example output:
 
 	'Juliet.']	1
@@ -84,9 +94,16 @@ Now we answer the question: Are there more Romeo or Juliet occurrances in the 'C
 	JULIET]	1
 	Juliet	17
 
-I immediately noticed that the mapper did not take into account special characters. So, after filtering out special characters and ignoring upper cases, here is the output:
+I immediately noticed that the mapper did not take into account special characters. So, instead of emitting the original word, I emitted 'Romeo' if the word contained Romeo and 'Juliet' if the word contained Juliet:
 
 	Juliet	206
 	Romeo	313
 
-As we can see, Romeo occurs more times than Juliet.
+As we can see, Romeo occurs more times than Juliet. Next, I computed the average word count.
+
+#Average Word Count
+
+To compute the average word count, I had to compute 2 things in the reducer: total word count and number of lines. As explained in the lecture, calculating the average in the mapper does not work. The average of averages is not the same as the average. Thus, I imported IntPair from `org.apache.hadoop.examples.SecondarySort.IntPair` and `org.apache.hadoop.io.DoubleWritable` to replace the IntWritable, as the average words per line does not have to be a natural number. 
+
+As explained in the lecture, the output of the mapper has to be the same as the input of the reducer. Thus, I changed the output of the mapper to emit the same word for every reducer and an IntPair containing the number of words and 1: `emit("", IntPair(number_of_words, 1))`. The input of the reducer changes from IntWritable to IntPair. Moreover, in the reducer, the number of words are summed up and the number of lines are summed up. Then, number of words are divided by number of lines and then emitted as a DoubleWritable. The output is `6.489`.
+
