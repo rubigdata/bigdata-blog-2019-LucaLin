@@ -1,4 +1,3 @@
-#Assignment 2#
 Here is my blog post on assignment 2. Assignment 2 was about the Map-Reduce framework and how to write code that can run on an hadoop cluster. In the lectures I got to learn how map-reduce code works and how to write working code. Here is what I did:
 
 1. First, I started a docker container and ran the hadoop file system in it. 
@@ -38,6 +37,7 @@ During the mapper phase, words are emitted after every word with a value of 1. D
 	'There	1
 	'There's	1
 	'These	1
+
 The Map-Reduce code does not take into account special characters. If we want to get the words so that special characters are filtered out, we need to do this in the map phase by using a regular expression to filter special characters out and emit the filtered word. 
 
 To get the total word count (of all words), the mapper can be changed to emit the same word every time. For example:
