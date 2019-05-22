@@ -1,4 +1,6 @@
-This is my blogpost on assignment 3.
+This is my blogpost on assignment 3. I have split the blog post in Notebook 1 and Notebook 2, since there are 2 notebooks. 
+
+##Notebook 1
 
 Assignment 3A focusses on the SPARK framework for Big Data. The assignment is divided into two, where part one main focus is RDD's and part two focusses on Dataframes and SPARK SQL. There is also assignment 3B, where the main goal is to analyze and work with real data of art and addresses in the city of Nijmegen and to integrate one into the other making use of SPARK SQL. 
 
@@ -46,9 +48,42 @@ using
 	words.saveAsTextFile("wc")
 the results are saved in multiple files. One of the questions is: Explain why there are multiple result files. This should be because the data is partitioned into multiple files and given to different workers. Each worker writes to its respective output file, creating multiple result files.
 
+##NoteBook 2
+
 In the following notebook, it is explained that the standard number of partitions depends on the number of cores in the machine that is running docker. However, the user can specify the number of partitions:
 
 	val rddRange = sc.parallelize(0 to 999,8)
 Here, the user specified 8 partitioners.
 
 The notebook makes use of a hashpartitioner. The idea is that the same keys will have the same hash, thus partitioning them together makes most sense. With a quick google search, it seems that SPARK uses hashpartitioner as the default partitioner if none is specified. However, there is also RangePartitioner and CustomPartitioner.
+
+The assignment contains two partitioners, one with 2 partitions and one  with 8:
+
+	rddPairsGroup.partitions.map(p => (p, p.index, p.hashCode)) //8 partitions
+	rddPairsGroupPart2.partitions.map(p => (p, p.index, p.hashCode))//2 partitions
+
+The two RDD's seem to output the same result. The only difference I could spot was the difference in number of partitions. One RDD would output 2 results and one would output 8. 
+
+	val rddPairs = rddRange.map(x => (x % 100, 1000 - x))
+	val rddPairsPart4 = rddPairs.partitionBy(new HashPartitioner(4))
+	val rddA = rddPairsPart4.values.map( x => x  + 10 )
+	printf( "Number of partitions: %d\n", rddA.partitions.length)
+	rddA.partitioner
+
+	
+	val rddB = rddPairsPart4.mapValues( x => x + 10 )
+	printf( "Number of partitions: %d\n", rddB.partitions.length)
+	rddB.partitioner
+
+The results of rddA and rddB are different. This is because rddA does not use a partitioner whereas rddB retains the partition specified in rddPairsPart4 (hashpartitioner(4)). This is probably because rddB uses the transformation .mapValues instead of .values.map. With a quick google search, I found out that .map gets access to both key and value, whereas mapValues only gets access to the value, does not change the key and retains the original partitioner. Source: https://spark.apache.org/docs/0.6.2/api/core/spark/PairRDDFunctions.html
+
+From stackoverflow: https://stackoverflow.com/questions/50058970/apache-spark-partitioning-in-map, I read that map transforms the whole tuple, returning a result which is not guaranteed to contain a key. Because the job of a partitioner is to shuffle the same keys together, this seems to be an important step. The partitioner is not preserved. 
+
+	val rddC = rddA.repartition(2)
+	rddC.partitions.map(p => (p, p.index, p.hashCode))
+	val rddD = rddB.coalesce(2)
+
+	rddC.takeSample(true, 10);
+	rddD.takeSample(true, 10);
+
+Here, the two RDD's output the same but there is a difference in query plan. rddC seems to have one extra shuffle phase. This is because repartition shuffles the data whereas coalesce does not. Coalesce reduces the number of partitions by reusing the same partitions and avoids shuffling data around. 
