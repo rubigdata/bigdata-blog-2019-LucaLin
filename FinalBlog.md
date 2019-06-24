@@ -1,4 +1,4 @@
-#Detecting English Language On The Internet
+# Detecting English Language On The Internet
 
 ## Table of Contents
 1. [Working with WARC files in Spark](#)
@@ -10,7 +10,7 @@
 7. [Concluions](#)
 8. [Working with the standalone program spark program](#)
 
-##Exploring CDX Index Service
+## Exploring CDX Index Service
 The last assignment for the 2018-2019 Bigdata course consists of an open assignment, where we download a large warc file and submit a standalone Spark application. For this, I made use of the CDX Index Service, which provide WARC files.
 
 For the first part of the assignment, I worked with a Spark notebook provided by the course. In the notebook, I familiarized myself with warc files and how to parse them. This was very helpful, as I still had trouble with scala syntax and the notebook provided an interactive way for me to write and test code. 
@@ -19,7 +19,7 @@ The part of the code which was already written inside the notebook included impo
 
 During the first week, I encountered a problem with the WARC files. I tried downloading multiple WARC files from the CDX index service but found that all documents contained within the downloaded WARC files gave 300-500 error responses. This is a problem, since I would like to do something with the contents of the documents. Later on, I realized the warc files I downloaded were labeled as status "301", which meant they contained only documents which gave error responses. This problem was quickly solved by downloading a WARC file with status "200".
 
-##Loading the WARC file into the notebook
+## Loading the WARC file into the notebook
 This was the easy part, since the code was given. The data is loaded using the surfsara class WarcInputFormat. Below is the code:
 		
 	val warcfile = "/opt/docker/notebooks/BigData/CC-MAIN-20190526045109-20190526071109-00464.warc.gz"
@@ -30,7 +30,7 @@ This was the easy part, since the code was given. The data is loaded using the s
               classOf[WarcRecord]                     // Value
     )
 
-##English vs non-english
+## English vs non-english
 Upon inspecting the contents of the WARC file, I noticed that the latest WARC file I downloaded contained a lot of non-english documents. To solve this issue, I filtered the RDD's containing the documents by domain (only allowing .com). However, commercial domains themselves contain a lot of non-english content and vice versa, thus I started to think about ways in which I could filter them. I tried using the Pattern class:
 
 	import java.util.regex.Pattern;
@@ -41,7 +41,7 @@ and regular expressions such as:
 	"(?<=\s|^)[a-zA-Z]*(?=[.,;:]?\s|$)" and "^[a-zA-Z]*$"
 Which filters the documents based on the alphabetic content. However, the documents were filtered down to just 75 english documents out of the 142450 documents, which I was sure was not possible. I soon looked for other ways to  try to filter out the english documents. 
 
-##Detecting English Language using 3-grams
+## Detecting English Language using 3-grams
 After failing to filter the documents using Patterns and regex, I started wondering what the best way to detect english would be. After some googling, I found that using n-grams is an effective way. Using this website:[English Letter Frequencies](http://practicalcryptography.com/cryptanalysis/letter-frequencies-various-languages/english-letter-frequencies/) I found the most common n-grams for the english language. Here, we can see that the biggest differences in frequencies occur in the monogram, bigram and trigram department and that the most common english word is "the".
 
 
@@ -63,7 +63,7 @@ At this point, I wondered if the bigram "th" would be a good way to get english 
 
 	.filter{_._3.unzip._1.toList.toString().contains("th")}
 
-##Results
+## Results
 
 In total, there were 142450 initial documents, 23873 documents contained the .com domain, 23400 of the .com domains were non-empty. 10645 of these documents were returned when filtering on the "th" bigram and had content, 46752 documents were returned when not filtering on the .com domain and not filtering with the "th" term
 
@@ -99,7 +99,7 @@ As we can see, most of the n-grams in top10 of table 1 and table 2 are the same.
 In total, there were 46752 documents in the WARC file which had content with more than 10 words. The results of including all domains is depicted in table 3 and table 4. 
 
 
-##Conclusions
+## Conclusions
 
 Comparing the n-grams generated with the code vs the top n-grams found in this link: [English Letter Frequencies](http://practicalcryptography.com/cryptanalysis/letter-frequencies-various-languages/english-letter-frequencies/), we can see that most bigrams and trigrams in the top10 of all .com files are also found in the top 30 bigrams and trigrams from the link ("_co" and "_de" from table 1 for example is not found in the top 30 bigrams from the link). However, when filtering the documents to contain "th" and "the" in their top10 3-grams, all 3-grams (except "___") are found in the top 30 most common bi and trigrams from the link. This does indicate that filtering the documents for their top10 3-grams helps in detecting the english language.
 
@@ -110,7 +110,7 @@ Moreover, when taking all documents, the result is also a top10 3-grams that con
 
 For future research, I would like to apply machine learning algorithms to detect english language in documents using Spark ML library. Moreover, I would like to implement tf-idf to extract more information out of the WARC files. However, due to time limitations I did not manage to get to these points. 
 
-##Working with the standalone spark program
+## Working with the standalone spark program
 
 For this assignment, we had to write code in scala which could be submitted to a cluster. This was much different from the notebooks. In the notebooks, I could write code and test it immediately. However, the standalone spark program had to be sent to the cluster, which came with latency problems and startup time problems. 
 
