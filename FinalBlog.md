@@ -1,14 +1,14 @@
 # Detecting English Language On The Internet
 
 ## Table of Contents
-1. [Working with WARC files in Spark](#)
-2. [Exploring CDX Index Service](#)
-3. [Loading the WARC file into the notebook](#)
-4. [English vs Non-english](#)
-5. [Detecting English Language using 3-grams](#)
+1. [Working with WARC files in Spark](#Working-with-WARC-files-in-Spark)
+2. [Exploring CDX Index Service](#Exploring-CDX-Index-Service)
+3. [Loading the WARC file into the notebook](#Loading-the-WARC-file-into-the-notebook)
+4. [English vs Non-english](#English-vs-Non-english)
+5. [Detecting English Language using 3-grams](#Detecting-English-Language-using-3-grams)
 6. [Results](#Results)
-7. [Concluions](#)
-8. [Working with the standalone program spark program](#)
+7. [Concluions](#Conclusions)
+8. [Working with the standalone spark program](#Working-With-The-Standalone-Spark-Program)
 
 ## Exploring CDX Index Service
 The last assignment for the 2018-2019 Bigdata course consists of an open assignment, where we download a large warc file and submit a standalone Spark application. For this, I made use of the CDX Index Service, which provide WARC files.
